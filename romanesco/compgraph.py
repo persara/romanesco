@@ -19,15 +19,20 @@ def define_computation_graph(vocab_size: int, batch_size: int):
         input_embeddings = tf.nn.embedding_lookup(embedding, inputs)
 
     with tf.name_scope('RNN'):
-        cell = tf.nn.rnn_cell.GRUCell(HIDDEN_SIZE)
+        cell = tf.nn.rnn_cell.BasicLSTMCell(HIDDEN_SIZE, state_is_tuple=True)
         initial_state = cell.zero_state(batch_size, tf.float32)
         rnn_outputs, rnn_states = tf.nn.dynamic_rnn(cell, input_embeddings, initial_state=initial_state)
+
+    with tf.name_scope('Hidden_layer'):
+        layer = tf.nn.rnn_cell.BasicLSTMCell(HIDDEN_SIZE, state_is_tuple=True)
+        initial_state = cell.zero_state(HIDDEN_SIZE, tf.float32)
+        hl_outputs, hl_states = tf.nn.dynamic_rnn(layer, cell, initial_state=initial_state)
 
     with tf.name_scope('Final_Projection'):
         w = tf.get_variable('w', shape=(HIDDEN_SIZE, vocab_size))
         b = tf.get_variable('b', vocab_size)
         final_projection = lambda x: tf.matmul(x, w) + b
-        logits = map_fn(final_projection, rnn_outputs)
+        logits = map_fn(final_projection, hl_outputs)
 
     with tf.name_scope('Cost'):
         # weighted average cross-entropy (log-perplexity) per symbol

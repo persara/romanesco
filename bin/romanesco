@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+# python romanesco train --epochs 1 -m "my_classifier/" training_data.csv
+# python romanesco score testing_data.csv -m "my_classifier/"
+# python romanesco sample -m "my_classifier/" -f "Hola"
+
 import sys
 import logging
 import argparse
