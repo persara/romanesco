@@ -24,9 +24,17 @@ def define_computation_graph(vocab_size: int, batch_size: int):
         rnn_outputs, rnn_states = tf.nn.dynamic_rnn(cell, input_embeddings, initial_state=initial_state)
 
     with tf.name_scope('Hidden_layer'):
+        # w1: weights from RNN output to hidden layer. HIDDEN_SIZE:
+        # size of RNN-output vector. SECOND_HIDDEN_SIZE: size of hidden-layer
+        # vector. Sizes defined in const.py. The size of the hidden layer is
+        # usually smaller thanthe size of the RNN.
         w1 = tf.get_variable('w1', shape=(HIDDEN_SIZE, SECOND_HIDDEN_SIZE))
+        # b1: bias vector. One bias for each neurone of hidden layer. It has
+        # the same size as the hidden layer.
         b1 = tf.get_variable('b1', SECOND_HIDDEN_SIZE)
         middle_projection = lambda x: tf.matmul(x, w1) + b1
+        # Output of hidden layer: uses the middle_projection algorithm and
+        # applies it to the output of the RNN.
         hidden_outputs = map_fn(middle_projection, rnn_outputs)
 
     with tf.name_scope('Final_Projection'):
